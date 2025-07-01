@@ -1,21 +1,19 @@
-# Use PHP with Apache  
 FROM php:8.2-apache
 
-# Install dependencies  
-RUN apt-get update && apt-get install -y git unzip libzip-dev \
-    && docker-php-ext-install mysqli pdo pdo_mysql zip \
-    && rm -rf /var/lib/apt/lists/*
+# Enable required PHP extensions
+RUN apt-get update && apt-get install -y libzip-dev unzip \
+    && docker-php-ext-install mysqli pdo pdo_mysql zip
 
-# Enable Apache rewrite  
-RUN a2enmod rewrite
+# Enable Apache mod_rewrite and set DirectoryIndex
+RUN a2enmod rewrite \
+    && echo "DirectoryIndex index.php index.html" >> /etc/apache2/apache2.conf
 
-# Copy source and set permissions  
-COPY . /var/www/html/
-RUN chown -R www-data:www-data /var/www/html \
-    && find /var/www/html -type d -exec chmod 755 {} \; \
-    && find /var/www/html -type f -exec chmod 644 {} \;
+# Set working directory and copy public-facing files
+WORKDIR /var/www/html
+COPY public/ /var/www/html/
 
-# Expose HTTP  
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
+
 EXPOSE 80
-
 CMD ["apache2-foreground"]
