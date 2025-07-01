@@ -7,11 +7,20 @@ RUN a2enmod rewrite \
  && echo "DirectoryIndex index.php index.html" >> /etc/apache2/apache2.conf \
  && echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-COPY . /var/www/anyspace/
+# Set Document Root
 ENV APACHE_DOCUMENT_ROOT=/var/www/anyspace/public
-RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
-    /etc/apache2/sites-available/000-default.conf
 
+# Update Apache config with new root
+RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf \
+ && echo '<Directory "/var/www/anyspace/public">\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>' >> /etc/apache2/apache2.conf
+
+# Copy app
+COPY . /var/www/anyspace/
+
+# Set permissions
 RUN chown -R www-data:www-data /var/www/anyspace \
  && chmod -R 755 /var/www/anyspace
 
