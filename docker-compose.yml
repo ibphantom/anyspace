@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    container_name: anyspace_app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./uploads:/var/www/html/uploads
+    environment:
+      DB_HOST: db
+      DB_NAME: anyspace
+      DB_USER: anyspace
+      DB_PASS: securepassword
+
+  db:
+    image: mysql:8.0
+    container_name: anyspace_db
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: anyspace
+      MYSQL_USER: anyspace
+      MYSQL_PASSWORD: securepassword
+
+volumes:
+  db_data:
